@@ -1,0 +1,11 @@
+node_modules/
+.expo/
+dist/
+.expo-export-check/
+server/.env
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+expo-go*.log
+expo-go-qr.png
+.DS_Store
