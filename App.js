@@ -1440,7 +1440,7 @@ function BottomNav({ screen, setScreen }) {
   );
 }
 
-async function apiRequest(path, { method = "GET", body, token, auth = true } = {}) {
+async function apiRequest(path, { method = "GET", body, token, auth = true, timeoutMs = 9000 } = {}) {
   const headers = {
     Accept: "application/json",
   };
@@ -1453,27 +1453,40 @@ async function apiRequest(path, { method = "GET", body, token, auth = true } = {
     headers.Authorization = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_BASE_URL}/api${path}`, {
-    method,
-    headers,
-    body: body !== undefined ? JSON.stringify(body) : undefined,
-  });
-  const text = await response.text();
-  let data = null;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
 
-  if (text) {
-    try {
-      data = JSON.parse(text);
-    } catch {
-      data = { error: text };
+  try {
+    const response = await fetch(`${API_BASE_URL}/api${path}`, {
+      method,
+      headers,
+      body: body !== undefined ? JSON.stringify(body) : undefined,
+      signal: controller.signal,
+    });
+    const text = await response.text();
+    let data = null;
+
+    if (text) {
+      try {
+        data = JSON.parse(text);
+      } catch {
+        data = { error: text };
+      }
     }
-  }
 
-  if (!response.ok) {
-    throw new Error(data?.error || `HTTP ${response.status}`);
-  }
+    if (!response.ok) {
+      throw new Error(data?.error || `HTTP ${response.status}`);
+    }
 
-  return data;
+    return data;
+  } catch (error) {
+    if (error?.name === "AbortError") {
+      throw new Error(`API не ответил за ${Math.round(timeoutMs / 1000)} сек. Проверьте, что сервер запущен и порт 3001 открыт.`);
+    }
+    throw error;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 function mapUser(row) {
