@@ -22,7 +22,7 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import QRCode from "react-native-qrcode-svg";
 
 const QR_BASE_URL = "smk-tech-request://new";
-const DEFAULT_API_URL = "http://192.168.0.123:3001";
+const DEFAULT_API_URL = "http://192.168.0.123:6666";
 const API_BASE_URL = (process.env.EXPO_PUBLIC_API_URL || DEFAULT_API_URL).replace(/\/$/, "");
 
 const colors = {
@@ -1481,7 +1481,7 @@ async function apiRequest(path, { method = "GET", body, token, auth = true, time
     return data;
   } catch (error) {
     if (error?.name === "AbortError") {
-      throw new Error(`API не ответил за ${Math.round(timeoutMs / 1000)} сек. Проверьте, что сервер запущен и порт 3001 открыт.`);
+      throw new Error(`API не ответил за ${Math.round(timeoutMs / 1000)} сек. Проверьте, что сервер запущен и порт 6666 открыт.`);
     }
     throw error;
   } finally {

@@ -6,7 +6,7 @@ const express = require("express");
 const jwt = require("jsonwebtoken");
 const { Pool } = require("pg");
 
-const PORT = Number(process.env.PORT || 3001);
+const PORT = Number(process.env.PORT || 6666);
 const DATABASE_URL = process.env.DATABASE_URL || "postgres://smk:smk_password@localhost:5432/smk";
 const JWT_SECRET = process.env.JWT_SECRET || "dev-secret-change-me";
 const QR_BASE_URL = "smk-tech-request://new";
