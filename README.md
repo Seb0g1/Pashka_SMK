@@ -36,6 +36,22 @@ npm --prefix server install
 docker compose up -d postgres
 ```
 
+Контейнер публикует PostgreSQL на порту `5433`, чтобы не конфликтовать с системным PostgreSQL на `5432`.
+
+Если на сервере старый Docker и команда `docker compose` падает, запустите без compose:
+
+```bash
+docker rm -f smk-postgres 2>/dev/null || true
+docker volume create smk_postgres_data
+docker run -d --name smk-postgres --restart unless-stopped \
+  -e POSTGRES_DB=smk \
+  -e POSTGRES_USER=smk \
+  -e POSTGRES_PASSWORD=smk_password \
+  -p 5433:5432 \
+  -v smk_postgres_data:/var/lib/postgresql/data \
+  postgres:16
+```
+
 Создать настройки API:
 
 ```bash
@@ -84,6 +100,26 @@ cp server/.env.example server/.env
 sudo docker compose up -d postgres
 ```
 
+Если появляется ошибка вроде `unknown shorthand flag: d in -d`, значит Docker Compose недоступен. Запустите контейнер напрямую:
+
+```bash
+sudo docker rm -f smk-postgres 2>/dev/null || true
+sudo docker volume create smk_postgres_data
+sudo docker run -d --name smk-postgres --restart unless-stopped \
+  -e POSTGRES_DB=smk \
+  -e POSTGRES_USER=smk \
+  -e POSTGRES_PASSWORD=smk_password \
+  -p 5433:5432 \
+  -v smk_postgres_data:/var/lib/postgresql/data \
+  postgres:16
+```
+
+Проверьте, что API смотрит на порт `5433`:
+
+```bash
+grep DATABASE_URL server/.env
+```
+
 Запустить API в `tmux`:
 
 ```bash
@@ -118,4 +154,5 @@ tmux attach -t smk-api
 - На Linux-сервере откройте порт `3001`, если включен firewall.
 - Expo Go должен быть совместим с SDK 54.
 - API автоматически создает таблицы и демо-данные при первом запуске.
+- Если на сервере уже есть PostgreSQL на `5432`, оставьте проектный PostgreSQL на `5433`.
 - QR-коды сохраняются в таблице `machine_qr_codes`, поэтому после перезапуска PostgreSQL они остаются в базе.
